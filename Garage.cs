@@ -1,8 +1,16 @@
+/*
+The class Garage stores a collection of vehicles
+The collection must be an array
+The array must be private. Access modifier: private.
+The garage capacity must be specified through the constructor.
+*/
+
 public class Garage
 {
     // Fields
-    private Vehicle[] _vehicles;
-    // Constructor
+    private Vehicle[] _vehicles; // private: _vehicles can only be accessed from inside the class.
+
+    // Constructors: same name as the class, none return type.
     public Garage(int capacity)
     {
         this._vehicles = new Vehicle[capacity];
