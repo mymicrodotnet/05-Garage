@@ -34,6 +34,7 @@ public class Garage
         // Parameter validation: checks the incoming method parameter vehicle exists. Rejects a null vehicle passed by mistake to this method. Example: garage.ParkVehicle(null). 
         if (vehicle == null)
         {
+            System.Console.WriteLine("The vehicle object cannot be null.");
             return false; // vehicle is null
         }
 
@@ -55,11 +56,11 @@ public class Garage
             if (_vehicles[i] == null)
             {
                 _vehicles[i] = vehicle;
-                System.Console.WriteLine("Vehicle successfully parked");
+                System.Console.WriteLine("Vehicle successfully parked.");
                 return true; // parked
             }
         }
-        System.Console.WriteLine("Garage full");
+        System.Console.WriteLine("Garage full.");
         return false; // full
     }
 }
