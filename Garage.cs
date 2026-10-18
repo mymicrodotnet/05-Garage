@@ -13,6 +13,14 @@ public class Garage
     // Constructors: same name as the class, none return type.
     public Garage(int capacity)
     {
+        // Validate capacity to ensure the garage has a positive capacity. Throw an exception if the argument is invalid.
+        if (capacity <= 0)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(capacity),
+                "Garage capacity must be greater than zero."
+            );
+        }
         this._vehicles = new Vehicle[capacity];
         // Creates an array with 'capacity' positions.
         // Each position initially contains null because
