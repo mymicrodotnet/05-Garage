@@ -28,6 +28,8 @@ public class Garage
 
     }
 
+    // Methods
+    # region ParkVehicle
     // Method: The public access modifier allows Program.cs to call this method.
     public bool ParkVehicle(Vehicle vehicle)
     {
@@ -44,7 +46,7 @@ public class Garage
             if (_vehicles[j] != null &&
             _vehicles[j].RegistrationNumber.ToUpper() == vehicle.RegistrationNumber.ToUpper()) // _vehicles[j] != null to ensure the slot contains a vehicle before accessing its properties. When _vehicles[j] is null, C# never evaluates _vehicles[j].RegistrationNumber, avoiding a NullReferenceException.
             {
-                System.Console.WriteLine("Registration Number duplicated.");
+                System.Console.WriteLine($"Registration Number {vehicle.RegistrationNumber} duplicated.");
                 return false;
             }
         }
@@ -56,11 +58,39 @@ public class Garage
             if (_vehicles[i] == null)
             {
                 _vehicles[i] = vehicle;
-                System.Console.WriteLine("Vehicle successfully parked.");
+                System.Console.WriteLine($"Vehicle {vehicle.RegistrationNumber} successfully parked.");
                 return true; // parked
             }
         }
         System.Console.WriteLine("Garage full.");
         return false; // full
     }
+    #endregion
+
+    #region RemoveVehicle
+    // Method: Remove vehicle by registration number case-insensitive.
+    public bool RemoveVehicle(string registrationNumber)
+    {
+        // Parameter validation.
+        if (string.IsNullOrWhiteSpace(registrationNumber))
+        {
+            System.Console.WriteLine($"The registration number {registrationNumber} cannot be null or empty");
+            return false;
+        }
+
+        // Search for the vehicle in the array _vehicles.
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if (_vehicles[i] != null && _vehicles[i].RegistrationNumber.ToUpper() == registrationNumber.ToUpper())
+            {
+                // Remove the vehicle by making its array position empty.
+                _vehicles[i] = null;
+                System.Console.WriteLine($"Vehicle's registration number: {registrationNumber} successfully removed.");
+                return true;
+            }
+        }
+        System.Console.WriteLine($"Vehicle's registration number: {registrationNumber} not found.");
+        return false;
+    }
+    #endregion
 }
