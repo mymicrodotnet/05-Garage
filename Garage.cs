@@ -31,16 +31,27 @@ public class Garage
     // Method: The public access modifier allows Program.cs to call this method.
     public bool ParkVehicle(Vehicle vehicle)
     {
-        // Input validation: rejects a null vehicle
+        // Parameter validation: checks the incoming method parameter vehicle exists. Rejects a null vehicle passed by mistake to this method. Example: garage.ParkVehicle(null). 
         if (vehicle == null)
         {
             return false; // vehicle is null
         }
 
-        // find the first null in the array to park a vehicle
+        // Duplicate validation: registration number must be unique.
+        for (int j = 0; j < _vehicles.Length; j++)
+        {
+            if (_vehicles[j] != null &&
+            _vehicles[j].RegistrationNumber.ToUpper() == vehicle.RegistrationNumber.ToUpper()) // _vehicles[j] != null to ensure the slot contains a vehicle before accessing its properties. When _vehicles[j] is null, C# never evaluates _vehicles[j].RegistrationNumber, avoiding a NullReferenceException.
+            {
+                System.Console.WriteLine("Registration Number duplicated.");
+                return false;
+            }
+        }
+
+        // Find the first null in the array to park a vehicle. Finds a parking spot.
         for (int i = 0; i < _vehicles.Length; i++)
         {
-            // stores the vehicle in the first empty position.
+            // Stores the vehicle in the first empty position.
             if (_vehicles[i] == null)
             {
                 _vehicles[i] = vehicle;
