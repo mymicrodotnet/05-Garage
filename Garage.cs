@@ -93,4 +93,33 @@ public class Garage
         return false;
     }
     #endregion
+
+    #region ListVehicles
+    // Method: creates a new array to store vehicles in the garage.
+    public Vehicle[] ListVehicles()
+    {
+        int countVehicles = 0;
+
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if (_vehicles[i] != null)
+            {
+                countVehicles++;
+            }
+        }
+        Vehicle[] allVehiclesInGarage = new Vehicle[countVehicles];
+        int counter = 0;
+
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if (_vehicles[i] != null)
+            {
+                allVehiclesInGarage[counter] = _vehicles[i];
+                // System.Console.WriteLine($"{allVehiclesInGarage[counter].RegistrationNumber}");
+                counter++;
+            }
+        }
+        return allVehiclesInGarage;
+    }
+    #endregion
 }

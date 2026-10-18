@@ -7,6 +7,9 @@ Test:
 5. Garage full
 6. vehicle null (null means: there is no object reference)
 7. Remove vehicle case-insensitive
+8. Validate Vehicle properties
+9. List of vehicles in the garage
+
 */
 Garage garage = new Garage(3);
 
@@ -69,4 +72,10 @@ try
 catch (ArgumentException ex)
 {
     Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
+}
+
+Vehicle[] allVehiclesInGarage = garage.ListVehicles();
+foreach (Vehicle vehicle in allVehiclesInGarage)
+{
+    System.Console.WriteLine($"{vehicle.RegistrationNumber}"); // ABC123 XYZ456 ABC222
 }
