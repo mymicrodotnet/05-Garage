@@ -122,4 +122,27 @@ public class Garage
         return allVehiclesInGarage;
     }
     #endregion
+
+    #region FindVehicleByRegistrationNumber
+    // Method: returns the whole vehicle if registration number found. Returns null if not. Adding the nullability annotation (?), explicitly tells the compiler that returning null is intentional and allowed.
+    public Vehicle? FindVehicleByRegistrationNumber(string registrationNumber)
+    {
+        if (string.IsNullOrWhiteSpace(registrationNumber))
+        {
+            System.Console.WriteLine($"The registration number {registrationNumber} cannot be null or empty");
+            return null;
+        }
+
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if (_vehicles[i] != null && registrationNumber.ToUpper() == _vehicles[i].RegistrationNumber.ToUpper())
+            {
+                System.Console.WriteLine($"The vehicle {_vehicles[i].RegistrationNumber} found.");
+                return _vehicles[i];
+            }
+        }
+        System.Console.WriteLine($"The vehicle {registrationNumber} not found.");
+        return null;
+    }
+    #endregion
 }

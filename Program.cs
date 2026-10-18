@@ -79,3 +79,15 @@ foreach (Vehicle vehicle in allVehiclesInGarage)
 {
     System.Console.WriteLine($"{vehicle.RegistrationNumber}"); // ABC123 XYZ456 ABC222
 }
+
+Vehicle vehicleFound = garage.FindVehicleByRegistrationNumber("ABC123");
+Vehicle vehicleNotFound = garage.FindVehicleByRegistrationNumber("ABC000");
+if (vehicleNotFound == null)
+{
+    System.Console.WriteLine("Returns null"); // Returns null
+}
+
+System.Console.WriteLine(garage.FindVehicleByRegistrationNumber("ABC000")); // The vehicle ABC000 not found. and an empty line below.
+
+Console.WriteLine(vehicleNotFound == null); // True
+
