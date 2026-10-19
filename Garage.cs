@@ -217,5 +217,34 @@ public class Garage
     }
     #endregion
 
-}
+    #region FindVehiclesByFuelType    
+    // Method: uses `_vehicles[i] is a Car car` to verify the Type of Vehicle, in this case Car. 
+    public Vehicle[] FindVehiclesByFuelType(Car.FuelType fuelType)
+    {
+        int countVehiclesFuelType = 0;
 
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            // _vehicles[i] is Car car, Checks whether _vehicles[i] is a Car and, if so, assigns the object to the local variable car.
+            // vehicles[i] != null is unnecessary because if _vehicles[i] is null, the (is Car car) check returns false.
+            // car.GetType() == typeof(Car) is also valid but it does not check subclasses of subclases, checks whether the object's exact runtime type is Car. Instead, (is) checks the specified type and all its derived types, including subclasses of subclasses, at any inheritance depth, that is, also matches instances of subclasses of Car: public class Car : Vehicle { } | public class ElectricCar : Car { } | public class Tesla : ElectricCar { }
+            if ((_vehicles[i] is Car car) && (car.Fuel == fuelType))
+            {
+                countVehiclesFuelType++;
+            }
+        }
+        Vehicle[] allVehiclesByFuelType = new Vehicle[countVehiclesFuelType];
+        int counter = 0;
+
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if ((_vehicles[i] is Car car) && (car.Fuel == fuelType))
+            {
+                allVehiclesByFuelType[counter] = _vehicles[i];
+                counter++;
+            }
+        }
+        return allVehiclesByFuelType;
+    }
+    #endregion
+}
