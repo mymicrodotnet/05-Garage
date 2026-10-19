@@ -247,4 +247,46 @@ public class Garage
         return allVehiclesByFuelType;
     }
     #endregion
+
+    #region ListVehicleTypesAndCounts
+    // Method: only lists the type of vehicles and the quantity of each one.
+    public void ListVehicleTypesAndCounts()
+    {
+        int countCar = 0;
+        int countMotorcycle = 0;
+        int countAirplane = 0;
+        int countBus = 0;
+        int countBoat = 0;
+
+        foreach (Vehicle vehicle in _vehicles)
+        {
+            // if (vehicle != null) is not necessary because if vehicle is null, every `is` check returns false.
+            if (vehicle is Car)
+            {
+                countCar++;
+            }
+            if (vehicle is Motorcycle)
+            {
+                countMotorcycle++;
+            }
+            if (vehicle is Airplane)
+            {
+                countAirplane++;
+            }
+            if (vehicle is Bus)
+            {
+                countBus++;
+            }
+            if (vehicle is Boat)
+            {
+                countBoat++;
+            }
+        }
+        System.Console.WriteLine($"Cars: {countCar}");
+        System.Console.WriteLine($"Motorcycles: {countMotorcycle}");
+        System.Console.WriteLine($"Airplanes: {countAirplane}");
+        System.Console.WriteLine($"Buses: {countBus}");
+        System.Console.WriteLine($"Boats: {countBoat}");
+    }
+    #endregion
 }

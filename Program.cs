@@ -13,9 +13,13 @@ Test:
 11. Find vehicles by Vehicle property Color.
 12. Find vehicles by Vehicle NumberOfWheels property.
 13. Find vehicles by Car Fuel Type property.
+14. List each vehicle type and the quantity of each one.
 */
+
 // int capacity = 3;
-int capacity = 5;
+// int capacity = 5;
+// int capacity = 8;
+int capacity = 10;
 Garage garage = new Garage(capacity);
 
 Car car1 = new Car("ABC123", "Black", 4, Car.FuelType.Gasoline);
@@ -141,3 +145,25 @@ foreach (Vehicle element in allVehiclesByFuelType)
 {
     System.Console.WriteLine($"All Vehicles {element.RegistrationNumber} by fuel type {Car.FuelType.Diesel}");
 }
+
+
+Motorcycle motorcycle1 = new Motorcycle("MOT111", "Black", 2, 600);
+Airplane airplane1 = new Airplane("AIR111", "Black", 2, 6);
+Bus bus1 = new Bus("BUS111", "Black", 2, 10);
+Bus bus2 = new Bus("BUS222", "Black", 2, 10);
+Boat boat1 = new Boat("BOAT111", "Black", 2, 5.00);
+garage.ParkVehicle(motorcycle1);
+garage.ParkVehicle(airplane1);
+garage.ParkVehicle(bus1);
+garage.ParkVehicle(bus2);
+garage.ParkVehicle(boat1);
+allVehiclesInGarage = garage.ListVehicles();
+foreach (Vehicle vehicle in allVehiclesInGarage)
+{
+    // Verbatim: @ allows the string to span multiple lines.
+    System.Console.WriteLine($@"
+    Vehicle in Garage--> {vehicle.RegistrationNumber}
+    Type--> {vehicle.GetType()}    
+    "); // ABC123 XYZ456 ABC222
+}
+garage.ListVehicleTypesAndCounts();
