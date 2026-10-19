@@ -9,8 +9,9 @@ Test:
 7. Remove vehicle case-insensitive.
 8. Validate Vehicle properties.
 9. List of vehicles in the garage.
-10. Find vehicle by registration number.
-11. Find vehicles by vehicle property color.
+10. Find vehicle by Vehicle RegistrationNumber unique property.
+11. Find vehicles by Vehicle property Color.
+12. Find vehicles by Vehicle NumberOfWheels property.
 */
 Garage garage = new Garage(5);
 
@@ -30,7 +31,7 @@ System.Console.WriteLine(garage.ParkVehicle(null)); // The vehicle object cannot
 System.Console.WriteLine(garage.RemoveVehicle("ABC222")); // Vehicle's registration number: ABC222 not found, returns False
 System.Console.WriteLine(garage.RemoveVehicle("Abc111")); // Vehicle's registration number: Abc111 successfully removed, returns True
 System.Console.WriteLine(garage.ParkVehicle(car5)); // Vehicle ABC222 successfully parked, returns True. Reuses the freed slot.
-System.Console.WriteLine(garage.ParkVehicle(car10)); // Vehicle ABC222 successfully parked, returns True. Reuses the freed slot.
+System.Console.WriteLine(garage.ParkVehicle(car10)); // Vehicle ABC222 successfully parked, returns True.
 
 try
 {
@@ -107,3 +108,21 @@ foreach (Vehicle element in allVehiclesByColor)
     System.Console.WriteLine($"All Vehicles By Color {element.Color} {element.RegistrationNumber}");// All Vehicles By Color White XYZ456
 }
 
+int numberOfWheels = 4;
+Vehicle[] allVehiclesByWheels = garage.FindVechiclesByNumberOfWheels(numberOfWheels);
+foreach (Vehicle vehicle in allVehiclesByWheels)
+{
+    System.Console.WriteLine($"All vehicles by {vehicle.NumberOfWheels} wheels -> {vehicle.RegistrationNumber} {vehicle.Color}");
+}
+
+numberOfWheels = 2;
+allVehiclesByWheels = garage.FindVechiclesByNumberOfWheels(numberOfWheels);
+foreach (Vehicle vehicle in allVehiclesByWheels)
+{
+    System.Console.WriteLine($"All vehicles by {vehicle.NumberOfWheels} wheels -> {vehicle.RegistrationNumber} {vehicle.Color}");
+}
+
+if (allVehiclesByWheels.Length == 0)
+{
+    System.Console.WriteLine($"All vehicles by {numberOfWheels} wheels, Not Found");
+}

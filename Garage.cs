@@ -181,5 +181,41 @@ public class Garage
     }
     #endregion
 
+    #region FindVechiclesByNumberOfWheels
+    // Method: Returns and empty array if it does not match vehicles with numberOfWheels input. 
+    public Vehicle[] FindVechiclesByNumberOfWheels(int numberOfWheels)
+    {
+        // this check is invalid because numberOfWheels is an int, and a non-nullable int cannot be null
+        // if (numberOfWheels == null)
+        // {
+        //     System.Console.WriteLine("Number of wheels cannot be null. Returned: []");
+        //     return [];
+        // }        
+
+        int countVehicleWheels = 0;
+
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if (_vehicles[i] != null && _vehicles[i].NumberOfWheels == numberOfWheels)
+            {
+                countVehicleWheels++;
+            }
+        }
+        Vehicle[] vehiclesByWheels = new Vehicle[countVehicleWheels];
+
+        int counter = 0;
+
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if (_vehicles[i] != null && _vehicles[i].NumberOfWheels == numberOfWheels)
+            {
+                vehiclesByWheels[counter] = _vehicles[i];
+                counter++;
+            }
+        }
+        return vehiclesByWheels;
+    }
+    #endregion
+
 }
 
