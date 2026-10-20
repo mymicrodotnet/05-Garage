@@ -1,169 +1,431 @@
-﻿/*
-Test: 
-1. Object garage correctly created.
-2. _vehicles = [null, null, null], constructor works correctly.
-3. ParkVehicle() works properly.
-4. Registration number is unique.
-5. Garage full.
-6. vehicle null (null means: there is no object reference).
-7. Remove vehicle case-insensitive.
-8. Validate Vehicle properties.
-9. List of vehicles in the garage.
-10. Find vehicle by Vehicle RegistrationNumber unique property.
-11. Find vehicles by Vehicle property Color.
-12. Find vehicles by Vehicle NumberOfWheels property.
-13. Find vehicles by Car Fuel Type property.
-14. List each vehicle type and the quantity of each one.
-*/
+﻿System.Console.WriteLine("\n=== Welcome to GARAGE 1.0 Console App ===");
 
-// int capacity = 3;
-// int capacity = 5;
-// int capacity = 8;
-int capacity = 10;
+int capacity = ReadIntegerInput("Enter garage capacity: ", 1);
 Garage garage = new Garage(capacity);
 
-Car car1 = new Car("ABC123", "Black", 4, Car.FuelType.Gasoline);
-Car car2 = new Car("XYZ456", "White", 4, Car.FuelType.Gasoline);
-Car car3 = new Car("ABC123", "Red", 4, Car.FuelType.Gasoline);
-Car car4 = new Car("ABC111", "White", 4, Car.FuelType.Gasoline);
-Car car5 = new Car("ABC222", "Blue", 4, Car.FuelType.Gasoline);
-Car car10 = new Car("ABC999", "BlaCK", 4, Car.FuelType.Diesel);
 
-System.Console.WriteLine(garage.ParkVehicle(car1)); // Vehicle ABC123 successfully parked, returns True
-System.Console.WriteLine(garage.ParkVehicle(car2)); // Vehicle XYZ456 successfully parked, returns True
-System.Console.WriteLine(garage.ParkVehicle(car3)); // Registration Number ABC123 duplicated, returns False
-System.Console.WriteLine(garage.ParkVehicle(car4)); // Vehicle ABC111 successfully parked, returns True
-System.Console.WriteLine(garage.ParkVehicle(car5)); // Garage full, returns False
-System.Console.WriteLine(garage.ParkVehicle(null)); // The vehicle object cannot be null, returns False
-System.Console.WriteLine(garage.RemoveVehicle("ABC222")); // Vehicle's registration number: ABC222 not found, returns False
-System.Console.WriteLine(garage.RemoveVehicle("Abc111")); // Vehicle's registration number: Abc111 successfully removed, returns True
-System.Console.WriteLine(garage.ParkVehicle(car5)); // Vehicle ABC222 successfully parked, returns True. Reuses the freed slot.
-System.Console.WriteLine(garage.ParkVehicle(car10)); // Vehicle ABC222 successfully parked, returns True.
+//*** POPULATING THE GARAGE ***
+#region GaragePopulation
+Vehicle[] sampleVehicles =
+{
+    new Car("ABC111", "Red", 4, Car.FuelType.Gasoline),
+    new Car("ABC222", "Black", 4, Car.FuelType.Gasoline),
+    new Car("ABC333", "Black", 4, Car.FuelType.Diesel),
+    new Motorcycle("MOT111", "Black", 2, 600),
+    new Motorcycle("MOT222", "black", 2, 600),
+    new Motorcycle("MOT333", "PINk", 3, 600),
+    new Motorcycle("MOT444", "Pink", 2, 600),
+    new Airplane("AIR111", "White", 6, 2),
+    new Airplane("AIR111", "Pink", 3, 2), // duplicated
+    new Airplane("AIR222", "Pink", 3, 2),
+    new Bus("BUS111", "Blue", 6, 50),
+    new Bus("BUS222", "Red", 6, 50),
+    new Boat("BOA111", "White", 0, 7.5),
+    new Boat("BOA222", "red", 0, 7.5)
+};
 
-try
+for (int i = 0; i < sampleVehicles.Length && i < capacity; i++)
 {
-    Car car6 = new Car(null, "Blue", 4, Car.FuelType.Gasoline);
+    garage.ParkVehicle(sampleVehicles[i]);
 }
-catch (ArgumentException ex)
+#endregion
+
+// ***** MENU ******
+#region Menu
+bool running = true;
+while (running)
 {
-    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
+    Console.WriteLine("\n=== GARAGE 1.0 CONSOLE APP ===");
+    Console.WriteLine("1. Park a vehicle");
+    Console.WriteLine("2. Remove a vehicle");
+    Console.WriteLine("3. List all vehicles");
+    Console.WriteLine("4. Find by registration number");
+    Console.WriteLine("5. Search by color");
+    Console.WriteLine("6. Search by number of wheels");
+    Console.WriteLine("7. Search cars by fuel type");
+    Console.WriteLine("8. Search using multiple criteria");
+    Console.WriteLine("9. List vehicle types and counts");
+    Console.WriteLine("0. Shut down the app (Exit)");
+
+    string choice = ReadRequiredString("Choose an option: ");
+    System.Console.WriteLine("");
+
+    switch (choice)
+    {
+        case "1": // Park a vehicle -> submenu
+            ParkVehicle();
+            break;
+
+        case "2": // Remove a vehicle
+            {
+                string registrationToRemove =
+                    ReadRequiredString("Registration number: ");
+
+                garage.RemoveVehicle(registrationToRemove);
+                break;
+            }
+
+        case "3": // List all vehicles -> submenu
+            {
+                Vehicle[] vehicles = garage.ListVehicles();
+
+                if (vehicles.Length == 0)
+                {
+                    Console.WriteLine("The garage is empty.");
+                }
+                else
+                {
+                    foreach (Vehicle vehicle in vehicles)
+                    {
+                        DisplayVehicle(vehicle);
+                    }
+                }
+                break;
+            }
+
+        case "4": // Find by registration number
+            {
+                string registrationToFind =
+                    ReadRequiredString("Registration number: ");
+
+                Vehicle? found =
+                    garage.FindVehicleByRegistrationNumber(registrationToFind);
+
+                if (found != null)
+                {
+                    DisplayVehicle(found);
+                }
+                break;
+            }
+
+        case "5": // Search by color
+            {
+                string color = ReadRequiredString("Color: ");
+                DisplayResults(garage.FindVehiclesByCriteria(color: color));
+                break;
+            }
+
+        case "6": // Search by number of weels
+            {
+                int wheels = ReadIntegerInput("Number of wheels: ", 0);
+                DisplayResults(garage.FindVehiclesByCriteria(numberOfWheels: wheels));
+                break;
+            }
+
+        case "7": // Search cars by fuel type
+            {
+                Car.FuelType fuel = ReadFuelType();
+                DisplayResults(garage.FindVehiclesByFuelType(fuel));
+                break;
+            }
+
+        case "8": // Search using multiple criteria
+            {
+                string? registration =
+                    ReadOptionalString("Registration number (Enter to skip): ");
+
+                string? searchColor =
+                    ReadOptionalString("Color (Enter to skip): ");
+
+                int? searchWheels =
+                    ReadOptionalInt("Number of wheels (Enter to skip): ");
+
+                string? vehicleType =
+                    ReadOptionalString(
+                        "Vehicle type (Car/Motorcycle/Airplane/Bus/Boat; Enter to skip): ");
+
+                Vehicle[] matches = garage.FindVehiclesByCriteria(
+                    registrationNumber: registration,
+                    color: searchColor,
+                    numberOfWheels: searchWheels,
+                    vehicleType: vehicleType);
+
+                DisplayResults(matches);
+                break;
+            }
+
+        case "9": // List vehicle types and counts
+            garage.ListVehicleTypesAndCounts();
+            break;
+
+        case "0": // Exit
+            running = false;
+            Console.WriteLine("Goodbye!");
+            break;
+
+        default:
+            Console.WriteLine("Invalid menu option. Try again.");
+            break;
+    }
+}
+#endregion
+
+// ***** METHODS *****
+// Menu choice 1
+#region ParkVehicle
+void ParkVehicle()
+{
+    Console.WriteLine("\nVehicle types:");
+    Console.WriteLine("1. Car");
+    Console.WriteLine("2. Motorcycle");
+    Console.WriteLine("3. Airplane");
+    Console.WriteLine("4. Bus");
+    Console.WriteLine("5. Boat");
+
+    string type = ReadRequiredString("Choose vehicle type: ");
+
+    if (type != "1" && type != "2" && type != "3" &&
+        type != "4" && type != "5")
+    {
+        Console.WriteLine("Invalid vehicle type.");
+        return;
+    }
+
+    string registration = ReadRequiredString("Registration number: ");
+    string vehicleColor = ReadRequiredString("Color: ");
+    int vehicleWheels = ReadIntegerInput("Number of wheels: ", 0);
+
+    try
+    {
+        Vehicle vehicle;
+
+        switch (type)
+        {
+            case "1": // Car
+                {
+                    Car.FuelType fuel = ReadFuelType();
+
+                    vehicle = new Car(
+                        registration, vehicleColor, vehicleWheels, fuel);
+                    break;
+                }
+
+            case "2": // Motorcycle
+                {
+                    int cylinderVolume = ReadIntegerInput("Cylinder volume (cc): ", 1);
+
+                    vehicle = new Motorcycle(
+                        registration, vehicleColor, vehicleWheels, cylinderVolume);
+                    break;
+                }
+
+            case "3": // Airplane
+                {
+                    int engines = ReadIntegerInput("Number of engines: ", 1);
+
+                    vehicle = new Airplane(
+                        registration, vehicleColor, vehicleWheels, engines);
+                    break;
+                }
+
+            case "4": // Bus
+                {
+                    int seats = ReadIntegerInput("Number of seats: ", 1);
+
+                    vehicle = new Bus(
+                        registration, vehicleColor, vehicleWheels, seats);
+                    break;
+                }
+
+            default: // Boat
+                {
+                    double length = ReadDouble("Boat length: ", 5.0);
+
+                    vehicle = new Boat(
+                        registration, vehicleColor, vehicleWheels, length);
+                    break;
+                }
+        }
+
+        garage.ParkVehicle(vehicle);
+
+
+    }
+    catch (ArgumentException ex)
+    {
+        Console.WriteLine($"Invalid vehicle: {ex.Message}");
+    }
+}
+#endregion
+
+// Method to display vehicles. Menu choice: 3 and 4
+#region DisplayVehice
+void DisplayVehicle(Vehicle vehicle)
+{
+    Console.WriteLine(
+        $"{vehicle.GetType().Name} | " +
+        $"{vehicle.RegistrationNumber} | " +
+        $"{vehicle.Color} | {vehicle.NumberOfWheels} wheels");
+
+    switch (vehicle)
+    {
+        case Car car:
+            Console.WriteLine($"Fuel: {car.Fuel}\n");
+            break;
+
+        case Motorcycle motorcycle:
+            Console.WriteLine(
+                $"Cylinder volume: {motorcycle.CylinderVolume} cc\n");
+            break;
+
+        case Airplane airplane:
+            Console.WriteLine($"Engines: {airplane.NumberOfEngines}\n");
+            break;
+
+        case Bus bus:
+            Console.WriteLine($"Seats: {bus.NumberOfSeats}\n");
+            break;
+
+        case Boat boat:
+            Console.WriteLine($"Length: {boat.Length.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}\n");
+            break;
+    }
+}
+#endregion
+
+// Method for Fuel type validation
+#region ReadFuelType
+static Car.FuelType ReadFuelType()
+{
+    while (true)
+    {
+        string fuel = ReadRequiredString("Fuel type (Gasoline/Diesel): ");
+
+        if (fuel.Equals("Gasoline", StringComparison.OrdinalIgnoreCase))
+        {
+            return Car.FuelType.Gasoline;
+        }
+
+        if (fuel.Equals("Diesel", StringComparison.OrdinalIgnoreCase))
+        {
+            return Car.FuelType.Diesel;
+        }
+
+        Console.WriteLine("Invalid fuel type. Enter Gasoline or Diesel.");
+    }
+}
+#endregion
+
+// Method for Integer input validation
+#region ReadIntegerInput
+static int ReadIntegerInput(string prompt, int minimum)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+
+        if (int.TryParse(Console.ReadLine(), out int value) &&
+            value >= minimum)
+        {
+            return value;
+        }
+
+        Console.WriteLine(
+            $"Enter a whole number greater than or equal to {minimum}.");
+    }
+}
+#endregion
+
+// Method for Double input validation: converts the user's input into a decimal number and checks that it meets the minimum allowed value.
+#region ReadDouble
+static double ReadDouble(string prompt, double minimum)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+
+        string? input = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(input))
+        {
+            input = input.Replace(',', '.'); // Without Replace(',', '.'), InvariantCulture expects a decimal point, so "7,5" would not be interpreted as 7.5. CultureInfo.InvariantCulture tells C# how to interpret the number.
+
+            if (double.TryParse(
+                    input,
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    out double value) &&
+                value >= minimum)
+            {
+                return value;
+            }
+        }
+
+        Console.WriteLine(
+            $"Enter a number greater than or equal to {minimum.ToString(System.Globalization.CultureInfo.InvariantCulture)}.");
+    }
 }
 
-try
-{
-    Car car7 = new Car("", "Blue", 4, Car.FuelType.Gasoline);
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
-}
+#endregion
 
-try
+// Method for string input validation
+#region ReadRequiredString
+static string ReadRequiredString(string prompt)
 {
-    Car car7 = new Car("ABC777", "Blue", -1, Car.FuelType.Gasoline);
-}
-catch (ArgumentOutOfRangeException ex)
-{
-    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Number of wheels cannot be negative. (Parameter 'numberOfWheels')
-}
+    while (true)
+    {
+        Console.Write(prompt);
+        string? input = Console.ReadLine();
 
-try
-{
-    Car car8 = new Car("", "", 4, Car.FuelType.Gasoline);
-}
-catch (ArgumentException ex)
-{
-    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
-}
+        if (!string.IsNullOrWhiteSpace(input))
+        {
+            return input.Trim(); // Trim() removes whitespace from the beginning and end of a string. It does not remove spaces inside the text.
+        }
 
-try
-{
-    Car car9 = new Car("ABC999", null, 4, Car.FuelType.Gasoline);
+        Console.WriteLine("Input cannot be empty.");
+    }
 }
-catch (ArgumentException ex)
+#endregion
+
+// Method validation for Search using multiple criteria
+#region ReadOptionalString
+static string? ReadOptionalString(string prompt)
 {
-    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
-}
+    Console.Write(prompt);
+    string? input = Console.ReadLine();
 
-Vehicle[] allVehiclesInGarage = garage.ListVehicles();
-foreach (Vehicle vehicle in allVehiclesInGarage)
+    return string.IsNullOrWhiteSpace(input) ? null : input.Trim(); // Trim() removes whitespace from the beginning and end of a string. It does not remove spaces inside the text.
+}
+#endregion
+
+// Method validation for Search using multiple criteria
+#region ReadOptionalInt
+static int? ReadOptionalInt(string prompt)
 {
-    System.Console.WriteLine($"Vehicle in Garage-> {vehicle.RegistrationNumber}"); // ABC123 XYZ456 ABC222
-}
+    while (true)
+    {
+        Console.Write(prompt);
+        string? input = Console.ReadLine();
 
-Vehicle vehicleFound = garage.FindVehicleByRegistrationNumber("ABC123");
-Vehicle vehicleNotFound = garage.FindVehicleByRegistrationNumber("ABC000");
-if (vehicleNotFound == null)
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return null;
+        }
+
+        if (int.TryParse(input, out int value) && value >= 0)
+        {
+            return value;
+        }
+
+        Console.WriteLine(
+            "Enter a non-negative whole number or press Enter to skip.");
+    }
+}
+#endregion
+
+// Method for displying results in search using multiple criteria: 
+#region DisplayResults
+void DisplayResults(Vehicle[] results)
 {
-    System.Console.WriteLine("Returns null"); // Returns null
+    if (results.Length == 0)
+    {
+        Console.WriteLine("No matching vehicles found.");
+        return;
+    }
+
+    foreach (Vehicle vehicle in results)
+    {
+        DisplayVehicle(vehicle);
+    }
 }
-
-System.Console.WriteLine($"Vehicle by Registration number: {garage.FindVehicleByRegistrationNumber("ABC000")}"); // The vehicle ABC000 not found. and an empty line below.
-
-Console.WriteLine(vehicleNotFound == null); // True
-
-
-Vehicle[] allVehiclesByColor = garage.FindVehiclesByColor("black");
-foreach (Vehicle element in allVehiclesByColor)
-{
-    System.Console.WriteLine($"All Vehicles By Color {element.Color} {element.RegistrationNumber}"); // All Vehicles By Color Black ABC123 
-    // All Vehicles By Color BlaCK ABC999 
-}
-allVehiclesByColor = garage.FindVehiclesByColor("white");
-foreach (Vehicle element in allVehiclesByColor)
-{
-    System.Console.WriteLine($"All Vehicles By Color {element.Color} {element.RegistrationNumber}");// All Vehicles By Color White XYZ456
-}
-
-int numberOfWheels = 4;
-Vehicle[] allVehiclesByWheels = garage.FindVechiclesByNumberOfWheels(numberOfWheels);
-foreach (Vehicle vehicle in allVehiclesByWheels)
-{
-    System.Console.WriteLine($"All vehicles by {vehicle.NumberOfWheels} wheels -> {vehicle.RegistrationNumber} {vehicle.Color}");
-}
-
-numberOfWheels = 2;
-allVehiclesByWheels = garage.FindVechiclesByNumberOfWheels(numberOfWheels);
-foreach (Vehicle vehicle in allVehiclesByWheels)
-{
-    System.Console.WriteLine($"All vehicles by {vehicle.NumberOfWheels} wheels -> {vehicle.RegistrationNumber} {vehicle.Color}");
-}
-
-if (allVehiclesByWheels.Length == 0)
-{
-    System.Console.WriteLine($"All vehicles by {numberOfWheels} wheels, Not Found");
-}
-
-Vehicle[] allVehiclesByFuelType = garage.FindVehiclesByFuelType(Car.FuelType.Gasoline);
-foreach (Vehicle element in allVehiclesByFuelType)
-{
-    System.Console.WriteLine($"All Vehicles -> {element.RegistrationNumber} by fuel type {Car.FuelType.Gasoline}");
-}
-
-allVehiclesByFuelType = garage.FindVehiclesByFuelType(Car.FuelType.Diesel);
-foreach (Vehicle element in allVehiclesByFuelType)
-{
-    System.Console.WriteLine($"All Vehicles {element.RegistrationNumber} by fuel type {Car.FuelType.Diesel}");
-}
+#endregion
 
 
-Motorcycle motorcycle1 = new Motorcycle("MOT111", "Black", 2, 600);
-Airplane airplane1 = new Airplane("AIR111", "Black", 2, 6);
-Bus bus1 = new Bus("BUS111", "Black", 2, 10);
-Bus bus2 = new Bus("BUS222", "Black", 2, 10);
-Boat boat1 = new Boat("BOAT111", "Black", 2, 5.00);
-garage.ParkVehicle(motorcycle1);
-garage.ParkVehicle(airplane1);
-garage.ParkVehicle(bus1);
-garage.ParkVehicle(bus2);
-garage.ParkVehicle(boat1);
-allVehiclesInGarage = garage.ListVehicles();
-foreach (Vehicle vehicle in allVehiclesInGarage)
-{
-    // Verbatim: @ allows the string to span multiple lines.
-    System.Console.WriteLine($@"
-    Vehicle in Garage--> {vehicle.RegistrationNumber}
-    Type--> {vehicle.GetType()}    
-    "); // ABC123 XYZ456 ABC222
-}
-garage.ListVehicleTypesAndCounts();

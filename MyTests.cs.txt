@@ -1,0 +1,405 @@
+/*
+Test: 
+1. Object garage correctly created.
+2. _vehicles = [null, null, null], constructor works correctly.
+3. ParkVehicle() works properly.
+4. Registration number is unique.
+5. Garage full.
+6. vehicle null (null means: there is no object reference).
+7. Remove vehicle case-insensitive.
+8. Validate Vehicle properties.
+9. List of vehicles in the garage.
+10. Find vehicle by Vehicle RegistrationNumber unique property.
+11. Find vehicles by Vehicle property Color.
+12. Find vehicles by Vehicle NumberOfWheels property.
+13. Find vehicles by Car Fuel Type property.
+14. List each vehicle type and the quantity of each one.
+*/
+
+// int capacity = 3;
+// int capacity = 5;
+// int capacity = 8;
+// int capacity = 10;
+int capacity = 18;
+Garage garage = new Garage(capacity);
+
+Car car1 = new Car("ABC123", "Black", 4, Car.FuelType.Gasoline);
+Car car2 = new Car("XYZ456", "White", 4, Car.FuelType.Gasoline);
+Car car3 = new Car("ABC123", "Red", 4, Car.FuelType.Gasoline);
+Car car4 = new Car("ABC111", "White", 4, Car.FuelType.Gasoline);
+Car car5 = new Car("ABC222", "Blue", 4, Car.FuelType.Gasoline);
+Car car10 = new Car("ABC999", "BlaCK", 4, Car.FuelType.Diesel);
+
+System.Console.WriteLine(garage.ParkVehicle(car1)); // Vehicle ABC123 successfully parked, returns True
+System.Console.WriteLine(garage.ParkVehicle(car2)); // Vehicle XYZ456 successfully parked, returns True
+System.Console.WriteLine(garage.ParkVehicle(car3)); // Registration Number ABC123 duplicated, returns False
+System.Console.WriteLine(garage.ParkVehicle(car4)); // Vehicle ABC111 successfully parked, returns True
+System.Console.WriteLine(garage.ParkVehicle(car5)); // Garage full, returns False
+System.Console.WriteLine(garage.ParkVehicle(null)); // The vehicle object cannot be null, returns False
+System.Console.WriteLine(garage.RemoveVehicle("ABC222")); // Vehicle's registration number: ABC222 not found, returns False
+System.Console.WriteLine(garage.RemoveVehicle("Abc111")); // Vehicle's registration number: Abc111 successfully removed, returns True
+System.Console.WriteLine(garage.ParkVehicle(car5)); // Vehicle ABC222 successfully parked, returns True. Reuses the freed slot.
+System.Console.WriteLine(garage.ParkVehicle(car10)); // Vehicle ABC222 successfully parked, returns True.
+
+try
+{
+    Car car6 = new Car(null, "Blue", 4, Car.FuelType.Gasoline);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
+}
+
+try
+{
+    Car car7 = new Car("", "Blue", 4, Car.FuelType.Gasoline);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
+}
+
+try
+{
+    Car car7 = new Car("ABC777", "Blue", -1, Car.FuelType.Gasoline);
+}
+catch (ArgumentOutOfRangeException ex)
+{
+    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Number of wheels cannot be negative. (Parameter 'numberOfWheels')
+}
+
+try
+{
+    Car car8 = new Car("", "", 4, Car.FuelType.Gasoline);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
+}
+
+try
+{
+    Car car9 = new Car("ABC999", null, 4, Car.FuelType.Gasoline);
+}
+catch (ArgumentException ex)
+{
+    Console.WriteLine($"Validation test passed: {ex.Message}"); // Validation test passed: Registration number cannot be null, empty, or whitespace. (Parameter 'registrationNumber')
+}
+
+Vehicle[] allVehiclesInGarage = garage.ListVehicles();
+foreach (Vehicle vehicle in allVehiclesInGarage)
+{
+    System.Console.WriteLine($"Vehicle in Garage-> {vehicle.RegistrationNumber}"); // ABC123 XYZ456 ABC222
+}
+
+Vehicle vehicleFound = garage.FindVehicleByRegistrationNumber("ABC123");
+Vehicle vehicleNotFound = garage.FindVehicleByRegistrationNumber("ABC000");
+if (vehicleNotFound == null)
+{
+    System.Console.WriteLine("Returns null"); // Returns null
+}
+
+System.Console.WriteLine($"Vehicle by Registration number: {garage.FindVehicleByRegistrationNumber("ABC000")}"); // The vehicle ABC000 not found. and an empty line below.
+
+Console.WriteLine(vehicleNotFound == null); // True
+
+
+Vehicle[] allVehiclesByColor = garage.FindVehiclesByColor("black");
+foreach (Vehicle element in allVehiclesByColor)
+{
+    System.Console.WriteLine($"All Vehicles By Color {element.Color} {element.RegistrationNumber}"); // All Vehicles By Color Black ABC123 
+    // All Vehicles By Color BlaCK ABC999 
+}
+allVehiclesByColor = garage.FindVehiclesByColor("white");
+foreach (Vehicle element in allVehiclesByColor)
+{
+    System.Console.WriteLine($"All Vehicles By Color {element.Color} {element.RegistrationNumber}");// All Vehicles By Color White XYZ456
+}
+
+int numberOfWheels = 4;
+Vehicle[] allVehiclesByWheels = garage.FindVehiclesByNumberOfWheels(numberOfWheels);
+foreach (Vehicle vehicle in allVehiclesByWheels)
+{
+    System.Console.WriteLine($"All vehicles by {vehicle.NumberOfWheels} wheels -> {vehicle.RegistrationNumber} {vehicle.Color}");
+}
+
+numberOfWheels = 2;
+allVehiclesByWheels = garage.FindVehiclesByNumberOfWheels(numberOfWheels);
+foreach (Vehicle vehicle in allVehiclesByWheels)
+{
+    System.Console.WriteLine($"All vehicles by {vehicle.NumberOfWheels} wheels -> {vehicle.RegistrationNumber} {vehicle.Color}");
+}
+
+if (allVehiclesByWheels.Length == 0)
+{
+    System.Console.WriteLine($"All vehicles by {numberOfWheels} wheels, Not Found");
+}
+
+Vehicle[] allVehiclesByFuelType = garage.FindVehiclesByFuelType(Car.FuelType.Gasoline);
+foreach (Vehicle element in allVehiclesByFuelType)
+{
+    System.Console.WriteLine($"All Vehicles -> {element.RegistrationNumber} by fuel type {Car.FuelType.Gasoline}");
+}
+
+allVehiclesByFuelType = garage.FindVehiclesByFuelType(Car.FuelType.Diesel);
+foreach (Vehicle element in allVehiclesByFuelType)
+{
+    System.Console.WriteLine($"All Vehicles {element.RegistrationNumber} by fuel type {Car.FuelType.Diesel}");
+}
+
+
+Motorcycle motorcycle1 = new Motorcycle("MOT111", "Black", 2, 600);
+Airplane airplane1 = new Airplane("AIR111", "Black", 2, 6);
+Bus bus1 = new Bus("BUS111", "Black", 2, 10);
+Bus bus2 = new Bus("BUS222", "Black", 2, 10);
+Boat boat1 = new Boat("BOAT111", "Black", 2, 5.00);
+garage.ParkVehicle(motorcycle1);
+garage.ParkVehicle(airplane1);
+garage.ParkVehicle(bus1);
+garage.ParkVehicle(bus2);
+garage.ParkVehicle(boat1);
+allVehiclesInGarage = garage.ListVehicles();
+foreach (Vehicle vehicle in allVehiclesInGarage)
+{
+    // Verbatim: @ allows the string to span multiple lines.
+    System.Console.WriteLine($@"
+    Vehicle in Garage--> {vehicle.RegistrationNumber}
+    Type--> {vehicle.GetType()}    
+    "); // ABC123 XYZ456 ABC222
+}
+garage.ListVehicleTypesAndCounts();
+
+// Additional vehicles for filter testing
+// Additional vehicles for filter testing
+Car car11 = new Car("CAR111", "Black", 4, Car.FuelType.Gasoline);
+Car car12 = new Car("CAR222", "Red", 4, Car.FuelType.Diesel);
+Car car13 = new Car("CAR333", "Blue", 3, Car.FuelType.Gasoline);
+Car car14 = new Car("CAR444", "Green", 4, Car.FuelType.Diesel);
+
+Motorcycle motorcycle2 = new Motorcycle("MOT222", "Red", 2, 900);
+Motorcycle motorcycle3 = new Motorcycle("MOT333", "Blue", 3, 500);
+
+Airplane airplane2 = new Airplane("AIR222", "White", 6, 4);
+Bus bus3 = new Bus("BUS333", "Blue", 6, 50);
+Boat boat2 = new Boat("BOAT222", "White", 0, 8.00);
+
+// Park additional vehicles
+garage.ParkVehicle(car11);
+garage.ParkVehicle(car12);
+garage.ParkVehicle(car13);
+garage.ParkVehicle(car14);
+garage.ParkVehicle(motorcycle2);
+garage.ParkVehicle(motorcycle3);
+garage.ParkVehicle(airplane2);
+garage.ParkVehicle(bus3);
+garage.ParkVehicle(boat2);
+
+// list all vehicles in Garage
+allVehiclesInGarage = garage.ListVehicles();
+foreach (Vehicle vehicle in allVehiclesInGarage)
+{
+    // Verbatim: @ allows the string to span multiple lines.
+    System.Console.WriteLine($@"
+    Vehicle in Garage--> {vehicle.RegistrationNumber}
+    Type--> {vehicle.GetType()}    
+    "); // ABC123 XYZ456 ABC222
+}
+
+
+// Test 1: Find vehicles by color
+Console.WriteLine("\n--- Test 1: Find red vehicles ---");
+Vehicle[] results1 = garage.FindVehicles(color: "Red");
+
+foreach (Vehicle vehicle in results1)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber} - {vehicle.Color}");
+}
+if (results1.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+
+// Test 2: Find vehicles by number of wheels
+Console.WriteLine("\n--- Test 2: Find vehicles with 3 wheels ---");
+Vehicle[] results2 = garage.FindVehicles(numberOfWheels: 3);
+
+foreach (Vehicle vehicle in results2)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber} - {vehicle.NumberOfWheels} wheels");
+}
+if (results2.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+
+// Test 3: Find vehicles by type
+Console.WriteLine("\n--- Test 3: Find all motorcycles ---");
+Vehicle[] results3 = garage.FindVehicles(vehicleType: "Motorcycle");
+
+foreach (Vehicle vehicle in results3)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber} - {vehicle.Color}");
+}
+if (results3.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+
+// Test 4: Find vehicles by registration number
+Console.WriteLine("\n--- Test 4: Find vehicle CAR222 ---");
+Vehicle[] results4 = garage.FindVehicles(registrationNumber: "CAR222");
+
+foreach (Vehicle vehicle in results4)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber}");
+}
+if (results4.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+
+// Test 5: Combine color and number of wheels
+Console.WriteLine("\n--- Test 5: Find black vehicles with 4 wheels ---");
+Vehicle[] results5 = garage.FindVehicles(
+    color: "Black",
+    numberOfWheels: 4);
+
+foreach (Vehicle vehicle in results5)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber} - {vehicle.Color} - {vehicle.NumberOfWheels} wheels");
+}
+if (results5.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+
+// Test 6: Combine color and vehicle type
+Console.WriteLine("\n--- Test 6: Find black cars ---");
+Vehicle[] results6 = garage.FindVehicles(
+    color: "Black",
+    vehicleType: "Car");
+
+foreach (Vehicle vehicle in results6)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber} - {vehicle.Color}");
+}
+if (results6.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+
+// Test 7: Combine three filters
+Console.WriteLine("\n--- Test 7: Find black cars with 4 wheels ---");
+Vehicle[] results7 = garage.FindVehicles(
+    color: "Black",
+    numberOfWheels: 4,
+    vehicleType: "Car");
+
+foreach (Vehicle vehicle in results7)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber} - {vehicle.Color} - {vehicle.NumberOfWheels} wheels");
+}
+if (results7.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+
+// Test 8: Registration number not found
+Console.WriteLine("\n--- Test 8: Find non-existing registration number ---");
+Vehicle[] results8 = garage.FindVehicles(registrationNumber: "ZZZ999");
+
+if (results8.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+else
+{
+    foreach (Vehicle vehicle in results8)
+    {
+        Console.WriteLine(vehicle.RegistrationNumber);
+    }
+}
+
+
+// Test 9: Case-insensitive color search
+Console.WriteLine("\n--- Test 9: Find vehicles by color (bLaCk) ---");
+Vehicle[] results9 = garage.FindVehicles(color: "bLaCk");
+
+foreach (Vehicle vehicle in results9)
+{
+    Console.WriteLine($"{vehicle.GetType().Name} - {vehicle.RegistrationNumber} - {vehicle.Color}");
+}
+if (results9.Length == 0)
+{
+    Console.WriteLine("No vehicles found.");
+}
+
+/******************************************/
+// Test 1: Search motorcycles by cylinder volume
+Console.WriteLine("\n--- Test 1: Motorcycles by cylinder volume ---");
+Vehicle[] motorcyclesByVolume = garage.FindMotorcyclesByCylinderVolume(900);
+
+foreach (Vehicle vehicle in motorcyclesByVolume)
+{
+    Motorcycle motorcycle = (Motorcycle)vehicle;
+    Console.WriteLine($"{motorcycle.RegistrationNumber} - {motorcycle.CylinderVolume} cc");
+}
+
+if (motorcyclesByVolume.Length == 0)
+    Console.WriteLine("No motorcycles found.");
+
+
+// Test 2: Search airplanes by number of engines
+Console.WriteLine("\n--- Test 2: Airplanes by number of engines ---");
+Vehicle[] airplanesByEngines = garage.FindAirplanesByNumberOfEngines(4);
+
+foreach (Vehicle vehicle in airplanesByEngines)
+{
+    Airplane airplane = (Airplane)vehicle;
+    Console.WriteLine($"{airplane.RegistrationNumber} - {airplane.NumberOfEngines} engines");
+}
+
+if (airplanesByEngines.Length == 0)
+    Console.WriteLine("No airplanes found.");
+
+
+// Test 3: Search buses by number of seats
+Console.WriteLine("\n--- Test 3: Buses by number of seats ---");
+Vehicle[] busesBySeats = garage.FindBusesByNumberOfSeats(50);
+
+foreach (Vehicle vehicle in busesBySeats)
+{
+    Bus bus = (Bus)vehicle;
+    Console.WriteLine($"{bus.RegistrationNumber} - {bus.NumberOfSeats} seats");
+}
+
+if (busesBySeats.Length == 0)
+    Console.WriteLine("No buses found.");
+
+
+// Test 4: Search boats by length
+Console.WriteLine("\n--- Test 4: Boats by length ---");
+Vehicle[] boatsByLength = garage.FindBoatsByLength(8.00);
+
+foreach (Vehicle vehicle in boatsByLength)
+{
+    Boat boat = (Boat)vehicle;
+    Console.WriteLine($"{boat.RegistrationNumber} - {boat.Length}");
+}
+
+if (boatsByLength.Length == 0)
+    Console.WriteLine("No boats found.");
+
+// FindMotorcyclesByCylinderVolume
+// FindAirplanesByNumberOfEngines
+// FindBusesByNumberOfSeats
+// FindMotorcyclesByCylinderVolume
+// FindBoatsByLength
+// FindVehicles by criteria
