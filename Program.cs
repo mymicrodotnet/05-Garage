@@ -83,22 +83,20 @@ while (running)
             break;
 
         case "3": // List all vehicles -> submenu
-            {
-                Vehicle[] vehicles = garage.ListVehicles();
+            Vehicle[] vehicles = garage.ListVehicles();
 
-                if (vehicles.Length == 0)
-                {
-                    Console.WriteLine("The garage is empty.");
-                }
-                else
-                {
-                    foreach (Vehicle vehicle in vehicles)
-                    {
-                        DisplayVehicle(vehicle);
-                    }
-                }
-                break;
+            if (vehicles.Length == 0)
+            {
+                Console.WriteLine("The garage is empty.");
             }
+            else
+            {
+                foreach (Vehicle vehicle in vehicles)
+                {
+                    DisplayVehicle(vehicle);
+                }
+            }
+            break;
 
         case "4": // List vehicle types and counts
             garage.ListVehicleTypesAndCounts();
@@ -213,54 +211,42 @@ void ParkVehicle()
         switch (type)
         {
             case "1": // Car
-                {
-                    Car.FuelType fuel = ReadFuelType();
+                Car.FuelType fuel = ReadFuelType();
 
-                    vehicle = new Car(
-                        registration, vehicleColor, vehicleWheels, fuel);
-                    break;
-                }
+                vehicle = new Car(
+                    registration, vehicleColor, vehicleWheels, fuel);
+                break;
 
             case "2": // Motorcycle
-                {
-                    int cylinderVolume = ReadIntegerInput("Cylinder volume (cc): ", 1);
+                int cylinderVolume = ReadIntegerInput("Cylinder volume (cc): ", 1);
 
-                    vehicle = new Motorcycle(
-                        registration, vehicleColor, vehicleWheels, cylinderVolume);
-                    break;
-                }
+                vehicle = new Motorcycle(
+                    registration, vehicleColor, vehicleWheels, cylinderVolume);
+                break;
 
             case "3": // Airplane
-                {
-                    int engines = ReadIntegerInput("Number of engines: ", 1);
+                int engines = ReadIntegerInput("Number of engines: ", 1);
 
-                    vehicle = new Airplane(
-                        registration, vehicleColor, vehicleWheels, engines);
-                    break;
-                }
+                vehicle = new Airplane(
+                    registration, vehicleColor, vehicleWheels, engines);
+                break;
 
             case "4": // Bus
-                {
-                    int seats = ReadIntegerInput("Number of seats: ", 1);
+                int seats = ReadIntegerInput("Number of seats: ", 1);
 
-                    vehicle = new Bus(
-                        registration, vehicleColor, vehicleWheels, seats);
-                    break;
-                }
+                vehicle = new Bus(
+                    registration, vehicleColor, vehicleWheels, seats);
+                break;
 
             default: // Boat
-                {
-                    double length = ReadDouble("Boat length: ", 5.0);
+                double length = ReadDouble("Boat length: ", 5.0);
 
-                    vehicle = new Boat(
-                        registration, vehicleColor, vehicleWheels, length);
-                    break;
-                }
+                vehicle = new Boat(
+                    registration, vehicleColor, vehicleWheels, length);
+                break;
         }
 
         garage.ParkVehicle(vehicle);
-
-
     }
     catch (ArgumentException ex)
     {
@@ -330,39 +316,29 @@ void SearchBySpecificProperties()
     switch (choice)
     {
         case "1":
-            {
-                Car.FuelType fuel = ReadFuelType();
-                DisplayResults(garage.FindVehiclesByFuelType(fuel));
-                break;
-            }
+            Car.FuelType fuel = ReadFuelType();
+            DisplayResults(garage.FindVehiclesByFuelType(fuel));
+            break;
 
         case "2":
-            {
-                int volume = ReadIntegerInput("Cylinder volume (cc): ", 1);
-                DisplayResults(garage.FindMotorcyclesByCylinderVolume(volume));
-                break;
-            }
+            int volume = ReadIntegerInput("Cylinder volume (cc): ", 1);
+            DisplayResults(garage.FindMotorcyclesByCylinderVolume(volume));
+            break;
 
         case "3":
-            {
-                int engines = ReadIntegerInput("Number of engines: ", 1);
-                DisplayResults(garage.FindAirplanesByNumberOfEngines(engines));
-                break;
-            }
+            int engines = ReadIntegerInput("Number of engines: ", 1);
+            DisplayResults(garage.FindAirplanesByNumberOfEngines(engines));
+            break;
 
         case "4":
-            {
-                int seats = ReadIntegerInput("Number of seats: ", 1);
-                DisplayResults(garage.FindBusesByNumberOfSeats(seats));
-                break;
-            }
+            int seats = ReadIntegerInput("Number of seats: ", 1);
+            DisplayResults(garage.FindBusesByNumberOfSeats(seats));
+            break;
 
         case "5":
-            {
-                double length = ReadDouble("Boat length: ", 0.1);
-                DisplayResults(garage.FindBoatsByLength(length));
-                break;
-            }
+            double length = ReadDouble("Boat length: ", 0.1);
+            DisplayResults(garage.FindBoatsByLength(length));
+            break;
 
         case "0":
             return;
