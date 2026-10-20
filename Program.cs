@@ -77,13 +77,10 @@ while (running)
             break;
 
         case "2": // Remove a vehicle
-            {
-                string registrationToRemove =
-                    ReadRequiredString("Registration number: ");
+            string registrationToRemove = ReadRegistrationNumber("Registration number: ");
 
-                garage.RemoveVehicle(registrationToRemove);
-                break;
-            }
+            garage.RemoveVehicle(registrationToRemove);
+            break;
 
         case "3": // List all vehicles -> submenu
             {
@@ -113,8 +110,7 @@ while (running)
             break;
 
         case "6":
-            string registrationToFind =
-                ReadRequiredString("Registration number: ");
+            string registrationToFind = ReadRegistrationNumber("Registration number: ");
 
             Vehicle? found =
                 garage.FindVehicleByRegistrationNumber(registrationToFind);
@@ -140,8 +136,8 @@ while (running)
             break;
 
         case "10": // Search using multiple criteria
-            string? registration =
-                ReadOptionalString("Registration number (Enter to skip): ");
+            string? registration = ReadOptionalRegistrationNumber(
+"Registration number (Enter to skip): ");
 
             string? searchColor =
                 ReadOptionalString("Color (Enter to skip): ");
@@ -206,7 +202,7 @@ void ParkVehicle()
         return;
     }
 
-    string registration = ReadRequiredString("Registration number: ");
+    string registration = ReadRegistrationNumber("Registration number: ");
     string vehicleColor = ReadRequiredString("Color: ");
     int vehicleWheels = ReadIntegerInput("Number of wheels: ", 0);
 
@@ -518,6 +514,54 @@ void DisplayResults(Vehicle[] results)
     foreach (Vehicle vehicle in results)
     {
         DisplayVehicle(vehicle);
+    }
+}
+#endregion
+
+// Method for registration number validation
+#region ReadRegistrationNumber
+static string ReadRegistrationNumber(string prompt)
+{
+    while (true)
+    {
+        string registrationNumber = ReadRequiredString(prompt);
+
+        if (System.Text.RegularExpressions.Regex.IsMatch(
+            registrationNumber, @"^[A-Za-z]{3}[0-9]{3}$"))
+        {
+            return registrationNumber;
+        }
+
+        Console.WriteLine(
+            "Invalid registration number. Use exactly 3 letters followed by 3 digits (e.g., ABC123).");
+    }
+}
+#endregion
+
+// Method for optional registration number validation
+#region ReadOptionalRegistrationNumber
+static string? ReadOptionalRegistrationNumber(string prompt)
+{
+    while (true)
+    {
+        Console.Write(prompt);
+        string? input = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return null;
+        }
+
+        input = input.Trim();
+
+        if (System.Text.RegularExpressions.Regex.IsMatch(
+            input, @"^[A-Za-z]{3}[0-9]{3}$"))
+        {
+            return input;
+        }
+
+        Console.WriteLine(
+            "Invalid registration number. Use exactly 3 letters followed by 3 digits (e.g., ABC123), or press Enter to skip.");
     }
 }
 #endregion
