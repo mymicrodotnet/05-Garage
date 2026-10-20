@@ -122,7 +122,7 @@ while (running)
             break;
 
         case "7": // Search by color
-            string color = ReadRequiredString("Color: ");
+            string color = ReadColor("Color: ");
             DisplayResults(garage.FindVehiclesByCriteria(color: color));
             break;
 
@@ -140,7 +140,7 @@ while (running)
 "Registration number (Enter to skip): ");
 
             string? searchColor =
-                ReadOptionalString("Color (Enter to skip): ");
+                ReadOptionalColor("Color (Enter to skip): ");
 
             int? searchWheels =
                 ReadOptionalInt("Number of wheels (Enter to skip): ");
@@ -193,7 +193,7 @@ void ParkVehicle()
     while (type != "0" && type != "1" && type != "2" &&
            type != "3" && type != "4" && type != "5")
     {
-        Console.WriteLine("Invalid vehicle type. Choose between 1 and 5.");
+        Console.WriteLine("Invalid vehicle type. Choose between 0 and 5.");
         type = ReadRequiredString("Choose vehicle type: ");
     }
 
@@ -203,7 +203,7 @@ void ParkVehicle()
     }
 
     string registration = ReadRegistrationNumber("Registration number: ");
-    string vehicleColor = ReadRequiredString("Color: ");
+    string vehicleColor = ReadColor("Color: ");
     int vehicleWheels = ReadIntegerInput("Number of wheels: ", 0);
 
     try
@@ -562,6 +562,86 @@ static string? ReadOptionalRegistrationNumber(string prompt)
 
         Console.WriteLine(
             "Invalid registration number. Use exactly 3 letters followed by 3 digits (e.g., ABC123), or press Enter to skip.");
+    }
+}
+#endregion
+
+// Method for color validation
+#region ReadColor
+static string ReadColor(string prompt)
+{
+    string[] validColors =
+    {
+        "Red", "Black", "White", "Blue", "Pink",
+        "Green", "Yellow", "Orange", "Purple",
+        "Brown", "Gray", "Grey", "Silver"
+    };
+
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine(
+        $"Available colors: {string.Join(", ", validColors)}");
+    System.Console.WriteLine((""));
+    Console.ResetColor();
+
+    while (true)
+    {
+        string color = ReadRequiredString(prompt);
+
+        foreach (string validColor in validColors)
+        {
+            if (color.Equals(validColor, StringComparison.OrdinalIgnoreCase))
+            {
+                return validColor;
+            }
+        }
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(
+            "Invalid color. Choose one of the available colors.\n");
+        Console.ResetColor();
+
+    }
+}
+#endregion
+
+// Method for optional color validation
+#region ReadOptionalColor
+static string? ReadOptionalColor(string prompt)
+{
+    string[] validColors =
+    {
+        "Red", "Black", "White", "Blue", "Pink",
+        "Green", "Yellow", "Orange", "Purple",
+        "Brown", "Gray", "Grey", "Silver"
+    };
+    Console.ForegroundColor = ConsoleColor.Cyan;
+    Console.WriteLine(
+        $"Available colors: {string.Join(", ", validColors)}");
+    Console.ResetColor();
+
+    while (true)
+    {
+        Console.Write(prompt);
+        string? input = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(input))
+        {
+            return null;
+        }
+
+        input = input.Trim();
+
+        foreach (string validColor in validColors)
+        {
+            if (input.Equals(
+                validColor, StringComparison.OrdinalIgnoreCase))
+            {
+                return validColor;
+            }
+        }
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(
+            "Invalid color. Choose an available color or press Enter to skip.");
+        Console.ResetColor();
     }
 }
 #endregion
