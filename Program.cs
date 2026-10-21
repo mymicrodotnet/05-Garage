@@ -2,8 +2,72 @@
 System.Console.WriteLine("\n=== Welcome to GARAGE 1.0 Console App ===");
 Console.ResetColor();
 
-int capacity = ReadIntegerInput("Enter garage capacity: ", 1);
-Garage garage = new Garage(capacity);
+int capacity = 10;
+string configPath = Path.Combine(
+    AppContext.BaseDirectory,
+    "appsettings.json");
+
+if (File.Exists(configPath))
+{
+    try
+    {
+        string json = File.ReadAllText(configPath);
+        using System.Text.Json.JsonDocument document =
+            System.Text.Json.JsonDocument.Parse(json);
+
+        capacity = document.RootElement
+            .GetProperty("Garage")
+            .GetProperty("DefaultCapacity")
+            .GetInt32();
+
+        if (capacity <= 0)
+        {
+            throw new InvalidOperationException(
+                "Default capacity must be greater than zero.");
+        }
+    }
+    catch (Exception ex) when (
+        ex is System.Text.Json.JsonException ||
+        ex is InvalidOperationException ||
+        ex is KeyNotFoundException)
+    {
+        Console.WriteLine(
+            $"Invalid configuration: {ex.Message}");
+        capacity = ReadIntegerInput(
+            "Enter garage capacity: ", 1);
+    }
+}
+else
+{
+    capacity = ReadIntegerInput(
+        "Enter garage capacity: ", 1);
+}
+
+Garage[] garages = new Garage[3];
+
+string[] garageNames =
+{
+    "Car Garage",
+    "Motorcycle Garage",
+    "Hangar"
+};
+
+int[] garageCapacities =
+{
+    capacity,
+    ReadIntegerInput("Enter capacity for Motorcycle Garage: ", 1),
+    ReadIntegerInput("Enter capacity for Hangar: ", 1),
+    ReadIntegerInput("Enter capacity for Boat Garage: ", 1)
+};
+
+for (int i = 0; i < garages.Length; i++)
+{
+    garages[i] = new Garage(garageCapacities[i]);
+}
+
+int selectedGarageIndex = 0;
+Garage garage = garages[selectedGarageIndex];
+
 System.Console.WriteLine("");
 
 //*** POPULATING THE GARAGE ***
@@ -18,7 +82,7 @@ Vehicle[] sampleVehicles =
     new Motorcycle("MOT333", "PINk", 3, 600),
     new Motorcycle("MOT444", "Pink", 2, 600),
     new Airplane("AIR111", "White", 6, 2),
-    new Airplane("AIR111", "Pink", 3, 2), // Test: duplicate registration
+    new Airplane("AIR111", "Pink", 3, 2),
     new Airplane("AIR222", "Pink", 3, 2),
     new Bus("BUS111", "Blue", 6, 50),
     new Bus("BUS222", "Red", 6, 50),
@@ -26,15 +90,26 @@ Vehicle[] sampleVehicles =
     new Boat("BOA222", "red", 0, 7.5)
 };
 
-foreach (Vehicle vehicle in sampleVehicles)
+bool savedDataExists = false;
+
+for (int i = 0; i < garages.Length; i++)
 {
-    // garage.ParkVehicle(sampleVehicles[i]);
-    if (!garage.ParkVehicle(vehicle))
+    string savePath = Path.Combine(
+        AppContext.BaseDirectory,
+        $"garage-{i + 1}.txt");
+
+    if (File.Exists(savePath))
     {
-        if (garage.ListVehicles().Length >= capacity)
-        {
-            break;
-        }
+        savedDataExists = true;
+        LoadGarage(garages[i], savePath);
+    }
+}
+
+if (!savedDataExists)
+{
+    foreach (Vehicle vehicle in sampleVehicles)
+    {
+        garage.ParkVehicle(vehicle);
     }
 }
 #endregion
@@ -46,6 +121,9 @@ while (running)
 {
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine("\n=== GARAGE 1.0 CONSOLE APP ===\n");
+    Console.WriteLine(
+    $"Selected garage: {garageNames[selectedGarageIndex]} " +
+    $"(Capacity: {garageCapacities[selectedGarageIndex]} spaces)\n");
 
     Console.WriteLine("VEHICLE MANAGEMENT");
     Console.WriteLine("  1. Park a vehicle");
@@ -61,7 +139,8 @@ while (running)
     Console.WriteLine("  7. Search by color");
     Console.WriteLine("  8. Search by number of wheels");
     Console.WriteLine("  9. Search by vehicle-specific properties");
-    Console.WriteLine("  10. Search using multiple criteria\n");
+    Console.WriteLine("  10. Search using multiple criteria");
+    Console.WriteLine("  11. Select garage\n");
 
     Console.WriteLine("SHUT DOWN GARAGE");
     Console.WriteLine("  0. Exit\n");
@@ -103,7 +182,8 @@ while (running)
             break;
 
         case "5":
-            Console.WriteLine($"Garage capacity: {capacity}");
+            Console.WriteLine(
+                $"Garage capacity: {garageCapacities[selectedGarageIndex]}");
             Console.WriteLine($"Parked vehicles: {garage.ListVehicles().Length}");
             break;
 
@@ -156,8 +236,41 @@ while (running)
 
             DisplayResults(matches);
             break;
+        case "11":
+            for (int i = 0; i < garages.Length; i++)
+            {
+                Console.WriteLine(
+                    $"{i + 1}. {garageNames[i]} " +
+                    $"({garageCapacities[i]} spaces)");
+            }
+
+            int garageChoice = ReadIntegerInput(
+                "Select garage number: ", 1);
+
+            while (garageChoice > garages.Length)
+            {
+                Console.WriteLine("Invalid garage number.");
+                garageChoice = ReadIntegerInput(
+                    "Select garage number: ", 1);
+            }
+
+            selectedGarageIndex = garageChoice - 1;
+            garage = garages[selectedGarageIndex];
+
+            Console.WriteLine(
+                $"Selected {garageNames[selectedGarageIndex]}.");
+            break;
 
         case "0": // Exit
+            for (int i = 0; i < garages.Length; i++)
+            {
+                string savePath = Path.Combine(
+                    AppContext.BaseDirectory,
+                    $"garage-{i + 1}.txt");
+
+                Console.WriteLine($"Saving Garage {i + 1}: {garages[i].ListVehicles().Length} vehicles");
+                SaveGarage(garages[i], savePath);
+            }
             running = false;
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Thanks for using Garage 1.0!\n\n");
@@ -619,5 +732,111 @@ static string? ReadOptionalColor(string prompt)
             "Invalid color. Choose an available color or press Enter to skip.");
         Console.ResetColor();
     }
+}
+#endregion
+
+#region SaveGarage
+void SaveGarage(Garage garageToSave, string filePath)
+{
+    List<string> lines = new List<string>();
+
+    foreach (Vehicle vehicle in garageToSave.ListVehicles())
+    {
+        string line = vehicle switch
+        {
+            Car car =>
+                $"Car|{car.RegistrationNumber}|{car.Color}|{car.NumberOfWheels}|{car.Fuel}",
+
+            Motorcycle motorcycle =>
+                $"Motorcycle|{motorcycle.RegistrationNumber}|{motorcycle.Color}|{motorcycle.NumberOfWheels}|{motorcycle.CylinderVolume}",
+
+            Airplane airplane =>
+                $"Airplane|{airplane.RegistrationNumber}|{airplane.Color}|{airplane.NumberOfWheels}|{airplane.NumberOfEngines}",
+
+            Bus bus =>
+                $"Bus|{bus.RegistrationNumber}|{bus.Color}|{bus.NumberOfWheels}|{bus.NumberOfSeats}",
+
+            Boat boat =>
+                $"Boat|{boat.RegistrationNumber}|{boat.Color}|{boat.NumberOfWheels}|{boat.Length.ToString(System.Globalization.CultureInfo.InvariantCulture)}",
+
+            _ => throw new InvalidOperationException(
+                $"Unsupported vehicle type: {vehicle.GetType().Name}")
+        };
+
+        lines.Add(line);
+    }
+
+    File.WriteAllLines(filePath, lines);
+    Console.WriteLine($"Garage saved to {Path.GetFileName(filePath)}.");
+}
+
+void LoadGarage(Garage garageToLoad, string filePath)
+{
+    foreach (string line in File.ReadAllLines(filePath))
+    {
+        string[] parts = line.Split('|');
+
+        try
+        {
+            if (parts.Length != 5)
+            {
+                Console.WriteLine($"Invalid saved record: {line}");
+                continue;
+            }
+
+            string registration = parts[1];
+            string color = parts[2];
+
+            if (!int.TryParse(parts[3], out int wheels))
+            {
+                Console.WriteLine($"Invalid wheel count: {line}");
+                continue;
+            }
+
+            Vehicle? vehicle = parts[0] switch
+            {
+                "Car" => new Car(
+                    registration, color, wheels,
+                    Enum.Parse<Car.FuelType>(parts[4], true)),
+
+                "Motorcycle" => new Motorcycle(
+                    registration, color, wheels,
+                    int.Parse(parts[4])),
+
+                "Airplane" => new Airplane(
+                    registration, color, wheels,
+                    int.Parse(parts[4])),
+
+                "Bus" => new Bus(
+                    registration, color, wheels,
+                    int.Parse(parts[4])),
+
+                "Boat" => new Boat(
+                    registration, color, wheels,
+                    double.Parse(
+                        parts[4],
+                        System.Globalization.CultureInfo.InvariantCulture)),
+
+                _ => null
+            };
+
+            if (vehicle == null)
+            {
+                Console.WriteLine($"Unknown vehicle type: {parts[0]}");
+                continue;
+            }
+
+            garageToLoad.ParkVehicle(vehicle);
+        }
+        catch (Exception ex) when (
+            ex is ArgumentException ||
+            ex is FormatException ||
+            ex is OverflowException)
+        {
+            Console.WriteLine($"Could not load record '{line}': {ex.Message}");
+        }
+    }
+
+    Console.WriteLine($"Garage loaded from {Path.GetFileName(filePath)}.");
 }
 #endregion

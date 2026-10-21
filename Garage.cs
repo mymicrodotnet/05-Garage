@@ -4,13 +4,27 @@ The collection must be an array
 The array must be private. Access modifier: private.
 The garage capacity must be specified through the constructor.
 */
+public enum GarageType
+{
+    CarGarage,
+    MotorcycleGarage,
+    Hangar,
+    BoatGarage
+}
 public class Garage
 {
-    // Field
+    // Fields
     private Vehicle[] _vehicles; // private: _vehicles can only be accessed from inside the class.
 
+    private bool[] _occupiedUnits;
+    private int[] _vehicleParkingStarts;
+
+    // Properties
+    public GarageType Type { get; }
+    public int Capacity { get; }
+
     // Constructor: same name as the class, none return type.
-    public Garage(int capacity)
+    public Garage(int capacity, GarageType type)
     {
         // Validate capacity to ensure the garage has a positive capacity. Throw an exception if the argument is invalid.
         if (capacity <= 0)
@@ -20,76 +34,239 @@ public class Garage
                 "Garage capacity must be greater than zero."
             );
         }
-        this._vehicles = new Vehicle[capacity];
+        // this._vehicles = new Vehicle[capacity];
         // Creates an array with 'capacity' positions.
         // Each position initially contains null because
         // Vehicle is a reference type.
         // 'this' refers to the current object and is optional here.
 
+        this._vehicles = new Vehicle[capacity * 3];
+        this._occupiedUnits = new bool[capacity * 3];
+        this._vehicleParkingStarts = new int[capacity * 3];
+        this.Type = type;
     }
 
     // Methods
-    #region ParkVehicle
-    // Method: The public access modifier allows Program.cs to call this method.
-    public bool ParkVehicle(Vehicle vehicle)
+    #region CanAcceptVehicle
+    public bool CanAcceptVehicle(Vehicle vehicle)
     {
-        // Parameter validation: checks the incoming method parameter vehicle exists. Rejects a null vehicle passed by mistake to this method. Example: garage.ParkVehicle(null). 
-        if (vehicle == null)
+        return Type switch
         {
-            System.Console.WriteLine("The vehicle could not be parked: the vehicle object cannot be null.");
-            return false; // vehicle is null
+            GarageType.CarGarage =>
+                vehicle is Car || vehicle is Bus,
+
+            GarageType.MotorcycleGarage =>
+                vehicle is Motorcycle,
+
+            GarageType.Hangar =>
+                vehicle is Airplane,
+
+            GarageType.BoatGarage =>
+                vehicle is Boat,
+
+            _ => false
+        };
+    }
+    #endregion
+
+    #region CanFitVehicleType
+    public bool CanFitVehicleType(string vehicleType)
+    {
+        int requiredUnits = vehicleType switch
+        {
+            "Car" => 3,
+            "Bus" => 3,
+            "Motorcycle" => 1,
+            "Airplane" => 9,
+            "Boat" => 6,
+            _ => 0
+        };
+
+        if (requiredUnits == 0)
+        {
+            return false;
         }
 
-        // Duplicate validation: registration number must be unique.
-        for (int j = 0; j < _vehicles.Length; j++)
+        bool compatible = Type switch
         {
-            if (_vehicles[j] != null &&
-            _vehicles[j].RegistrationNumber.ToUpper() == vehicle.RegistrationNumber.ToUpper()) // _vehicles[j] != null to ensure the slot contains a vehicle before accessing its properties. When _vehicles[j] is null, C# never evaluates _vehicles[j].RegistrationNumber, avoiding a NullReferenceException.
+            GarageType.CarGarage =>
+                vehicleType == "Car" || vehicleType == "Bus",
+
+            GarageType.MotorcycleGarage =>
+                vehicleType == "Motorcycle",
+
+            GarageType.Hangar =>
+                vehicleType == "Airplane",
+
+            GarageType.BoatGarage =>
+                vehicleType == "Boat",
+
+            _ => false
+        };
+
+        if (!compatible)
+        {
+            return false;
+        }
+
+        for (int start = 0;
+             start <= _occupiedUnits.Length - requiredUnits;
+             start++)
+        {
+            bool fits = true;
+
+            for (int offset = 0; offset < requiredUnits; offset++)
             {
-                System.Console.WriteLine($"The vehicle could not be parked: Registration Number {vehicle.RegistrationNumber} duplicated.");
+                if (_occupiedUnits[start + offset])
+                {
+                    fits = false;
+                    break;
+                }
+            }
+
+            if (fits)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+    #endregion
+
+    #region ParkVehicle
+    public bool ParkVehicle(Vehicle vehicle)
+    {
+        if (vehicle == null)
+        {
+            System.Console.WriteLine(
+                "The vehicle could not be parked: the vehicle object cannot be null.");
+            return false;
+        }
+
+        if (!CanAcceptVehicle(vehicle))
+        {
+            System.Console.WriteLine(
+                $"The vehicle could not be parked: {vehicle.GetType().Name} is not allowed in this garage.");
+            return false;
+        }
+
+        // Check for duplicate registration numbers.
+        for (int i = 0; i < _vehicles.Length; i++)
+        {
+            if (_vehicles[i] != null &&
+                _vehicles[i].RegistrationNumber.Equals(
+                    vehicle.RegistrationNumber,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                System.Console.WriteLine(
+                    $"The vehicle could not be parked: Registration Number {vehicle.RegistrationNumber} duplicated.");
                 return false;
             }
         }
 
-        // Find the first null in the array to park a vehicle. Finds a parking spot.
+        // Find an empty vehicle-array slot.
+        int vehicleIndex = -1;
+
         for (int i = 0; i < _vehicles.Length; i++)
         {
-            // Stores the vehicle in the first empty position.
             if (_vehicles[i] == null)
             {
-                _vehicles[i] = vehicle;
-                System.Console.WriteLine($"Vehicle {vehicle.RegistrationNumber} successfully parked.");
-                return true; // parked
+                vehicleIndex = i;
+                break;
             }
         }
-        System.Console.WriteLine("The vehicle could not be parked: the garage is full.");
-        return false; // full
+
+        if (vehicleIndex == -1)
+        {
+            System.Console.WriteLine(
+                "The vehicle could not be parked: the vehicle array is full.");
+            return false;
+        }
+
+        // Convert the parking requirement into one-third-space units.
+        int requiredUnits = (int)decimal.Ceiling(
+            vehicle.ParkingSpaceRequirement * 3m);
+
+        // Find enough consecutive free parking units.
+        for (int start = 0; start <= _occupiedUnits.Length - requiredUnits; start++)
+        {
+            bool fits = true;
+
+            for (int offset = 0; offset < requiredUnits; offset++)
+            {
+                if (_occupiedUnits[start + offset])
+                {
+                    fits = false;
+                    break;
+                }
+            }
+
+            if (fits)
+            {
+                // Store the vehicle independently of its parking-unit index.
+                _vehicles[vehicleIndex] = vehicle;
+                _vehicleParkingStarts[vehicleIndex] = start;
+
+                // Mark its parking units as occupied.
+                for (int offset = 0; offset < requiredUnits; offset++)
+                {
+                    _occupiedUnits[start + offset] = true;
+                }
+
+                System.Console.WriteLine(
+                    $"Vehicle {vehicle.RegistrationNumber} successfully parked.");
+                return true;
+            }
+        }
+
+        System.Console.WriteLine(
+            $"The vehicle could not be parked: not enough consecutive parking space for {vehicle.RegistrationNumber}.");
+        return false;
     }
     #endregion
 
     #region RemoveVehicle
-    // Method: Remove vehicle by registration number case-insensitive.
     public bool RemoveVehicle(string registrationNumber)
     {
-        // Parameter validation.
         if (string.IsNullOrWhiteSpace(registrationNumber))
         {
-            System.Console.WriteLine($"The vehicle could not be removed: the registration number {registrationNumber} cannot be null or empty");
+            System.Console.WriteLine(
+                "The vehicle could not be removed: the registration number cannot be null or empty.");
             return false;
         }
 
-        // Search for the vehicle in the array _vehicles.
         for (int i = 0; i < _vehicles.Length; i++)
         {
-            if (_vehicles[i] != null && _vehicles[i].RegistrationNumber.ToUpper() == registrationNumber.ToUpper())
+            if (_vehicles[i] != null &&
+                _vehicles[i].RegistrationNumber.Equals(
+                    registrationNumber,
+                    StringComparison.OrdinalIgnoreCase))
             {
-                // Remove the vehicle by making its array position empty.
+                Vehicle vehicle = _vehicles[i];
+
+                int start = _vehicleParkingStarts[i];
+                int requiredUnits = (int)decimal.Ceiling(
+                    vehicle.ParkingSpaceRequirement * 3m);
+
+                // Release every parking unit occupied by this vehicle.
+                for (int offset = 0; offset < requiredUnits; offset++)
+                {
+                    _occupiedUnits[start + offset] = false;
+                }
+
+                // Remove the vehicle from the vehicle array.
                 _vehicles[i] = null;
-                System.Console.WriteLine($"Vehicle's registration number: {registrationNumber} successfully removed.");
+                _vehicleParkingStarts[i] = 0;
+
+                System.Console.WriteLine(
+                    $"Vehicle's registration number: {registrationNumber} successfully removed.");
                 return true;
             }
         }
-        System.Console.WriteLine($"The vehicle could not be removed: vehicle's registration number: {registrationNumber} not found.");
+
+        System.Console.WriteLine(
+            $"The vehicle could not be removed: vehicle's registration number: {registrationNumber} not found.");
         return false;
     }
     #endregion

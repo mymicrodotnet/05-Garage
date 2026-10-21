@@ -5,6 +5,8 @@ public class Vehicle
     public string Color { get; set; }
     public int NumberOfWheels { get; set; }
 
+    public virtual decimal ParkingSpaceRequirement => 1m;
+
     // Constructor
     public Vehicle(string registrationNumber, string color, int numberOfWheels)
     {

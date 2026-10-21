@@ -3,8 +3,9 @@ Boat inherits the common properties from Vehicle.
 */
 public class Boat : Vehicle
 {
-    // Property
+    // Properties
     public double Length { get; set; }
+    public override decimal ParkingSpaceRequirement => 2m;
 
     // Constructor
     public Boat(

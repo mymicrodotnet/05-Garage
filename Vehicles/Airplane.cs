@@ -3,8 +3,10 @@ Airplane inherits the common properties from Vehicle.
 */
 public class Airplane : Vehicle
 {
-    // Property
+    // Properties
     public int NumberOfEngines {get; set;}
+    
+    public override decimal ParkingSpaceRequirement => 3m;
     
     // Constructor
     public Airplane(

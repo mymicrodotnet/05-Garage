@@ -3,8 +3,10 @@ Motorcycle inherits the common properties from Vehicle.
 */
 public class Motorcycle : Vehicle
 {
-    // Property
+    // Properties
     public int CylinderVolume { get; set; }
+
+    public override decimal ParkingSpaceRequirement => 1m / 3m;
 
     // Constructor
     public Motorcycle(
